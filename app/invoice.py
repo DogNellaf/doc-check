@@ -192,9 +192,9 @@ def same_pack(a: str, b: str) -> bool:
     return not (sa and sb) or sa == sb
 
 
-def _match(embedder, names: list[str], other: list[str]):
-    return align(embedder, names, other, config.ITEM_MIN_DENSE, config.ITEM_MIN_LEXICAL,
-                 lambda i, j: same_pack(names[i], other[j]))  # fmt: skip
+def _match(names: list[str], other: list[str]):
+    return align(names, other, config.ITEM_MIN_SIMILARITY, config.ITEM_MIN_LEXICAL,
+                 allowed=lambda i, j: same_pack(names[i], other[j]))  # fmt: skip
 
 
 def _contract_name(s: Supplier) -> str:
@@ -206,7 +206,7 @@ def _f(level, kind, title, why="", where="", quote="", fix="", anchor="") -> Fin
     return Finding(level=level, kind=kind, title=title, why=why, where=where, quote=quote, fix=fix, anchor=anchor)
 
 
-def check(company: Company, embedder, text: str, model_lines: list[dict] | None = None) -> InvoiceResult:
+def check(company: Company, text: str, model_lines: list[dict] | None = None) -> InvoiceResult:
     """model_lines: the lines read by the model when the rules found none (see llm.extract_lines)."""
     d = parse_invoice(text)
     lines_by = "rules"
@@ -319,7 +319,7 @@ def check(company: Company, embedder, text: str, model_lines: list[dict] | None 
 
     # 4. prices: the supplier's agreed price list ---------------------------------------------------
     if supplier and supplier.spec and d.lines:
-        pairs = _match(embedder, [x.name for x in d.lines], [s.name for s in supplier.spec])
+        pairs = _match([x.name for x in d.lines], [s.name for s in supplier.spec])
         pair_of = {p.left: p for p in pairs}
         for i, x in enumerate(d.lines):
             p = pair_of.get(i)
@@ -346,7 +346,7 @@ def check(company: Company, embedder, text: str, model_lines: list[dict] | None 
     if d.order and order is None:
         flag(_f("medium", "order", f"Заказа № {d.order} нет в системе", "Количество не с чем сверить.", "основание"))
     if order and d.lines:
-        pairs = _match(embedder, [x.name for x in d.lines], [o.name for o in order.lines])
+        pairs = _match([x.name for x in d.lines], [o.name for o in order.lines])
         pair_of = {p.left: p for p in pairs}
         for i, x in enumerate(d.lines):
             p = pair_of.get(i)

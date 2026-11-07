@@ -6,18 +6,64 @@ from fastapi.testclient import TestClient
 from app import config
 from app.setup import build
 
-from .conftest import FakeEmbedder, example
+from .conftest import example
+
+
+@pytest.fixture(scope="module")
+def precomputed(tmp_path_factory):
+    """The examples checked as the image build does it, into a temporary folder."""
+    from app import precompute
+
+    path = tmp_path_factory.mktemp("precomputed")
+    mp = pytest.MonkeyPatch()
+    mp.setattr(config, "PRECOMPUTED_DIR", path)
+    precompute.main()
+    mp.undo()
+    return path
 
 
 @pytest.fixture
-def client(fake_thresholds, monkeypatch):
+def client(precomputed, monkeypatch):
     monkeypatch.setattr(config, "CHECKS_PER_DAY", 2)
+    monkeypatch.setattr(config, "PRECOMPUTED_DIR", precomputed)
     from app.api import app
 
-    app.state.service = build(embedder=FakeEmbedder(), model=None)
+    app.state.service = build(model="")
     with TestClient(app) as c:
         yield c
     del app.state.service
+
+
+def test_examples_come_from_the_build(precomputed):
+    assert (precomputed / "contract.json").exists() and (precomputed / "invoice.docx").exists()
+    # a fresh web process opens the examples and serves a report without loading the PDF, OCR
+    # and report libraries: they live only in the check's child process
+    import json
+    import os
+    import subprocess
+    import sys
+
+    code = """
+import json, sys
+from fastapi.testclient import TestClient
+from app.api import app
+with TestClient(app) as c:
+    ok = [c.get("/api/examples/contract").status_code, c.get("/api/report/example-invoice.docx").status_code]
+libs = ("pypdf", "pypdfium2", "docx", "openpyxl", "numpy", "PIL", "pytesseract")
+print(json.dumps({"ok": ok, "heavy": [m for m in libs if m in sys.modules]}))
+"""
+    env = {**os.environ, "PRECOMPUTED_DIR": str(precomputed)}
+    out = subprocess.run([sys.executable, "-c", code], env=env, capture_output=True, text=True, check=True)
+    got = json.loads(out.stdout.strip().splitlines()[-1])
+    assert got == {"ok": [200, 200], "heavy": []}
+
+
+def test_examples_without_the_build(tmp_path, monkeypatch):
+    # a dev machine without precompute: the examples are checked at start, in a child process
+    monkeypatch.setattr(config, "PRECOMPUTED_DIR", tmp_path)
+    service = build(model="")
+    assert {"contract", "invoice"} <= set(service.examples)
+    assert service.report("example-contract", "docx")[1] == "dogovor-postavki-31-27-правки.docx"
 
 
 def test_examples_are_ready_and_free(client):
@@ -87,3 +133,10 @@ def test_company_info(client):
     assert co["name"] == "ООО «Колосок»"
     assert len(co["reference"]) == 25 and len(co["rules"]) == 14
     assert co["suppliers"][0]["contract"] == "№ 14/26 от 01.09.2026"
+
+
+def test_a_stuck_check_is_stopped(client, monkeypatch):
+    monkeypatch.setattr(config, "CHECK_TIMEOUT", 0.01)
+    r = client.post("/api/check", files={"file": ("s.pdf", example("schet-412.pdf"))})
+    assert r.status_code == 400 and "слишком много времени" in r.json()["error"]
+    assert r.json()["remaining"] == 2  # a failed check does not count

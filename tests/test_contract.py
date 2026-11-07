@@ -2,7 +2,7 @@ from app import contract
 from app.contract import Clause, parse, run_rules
 from app.reader import read
 
-from .conftest import FakeEmbedder, example
+from .conftest import example
 
 
 def test_parse_the_supplier_draft():
@@ -57,9 +57,9 @@ def test_rules_by_wording(company):
     assert "pay-to-invoice-account" in _rules(company, "Оплата на расчётный счёт, указанный в счёте Поставщика.")
 
 
-def test_check_pairs_and_reports(company, fake_thresholds):
+def test_check_pairs_and_reports(company):
     text = read("d.docx", example("dogovor-postavki-31-27.docx")).text
-    r = contract.check(company, FakeEmbedder(), text).as_dict()
+    r = contract.check(company, text).as_dict()
     assert r["verdict"]["level"] == "high"
     rules = {f["rule"] for f in r["findings"] if f["kind"] == "rule"}
     assert {"prepayment", "price-unilateral", "claims-hours", "jurisdiction"} <= rules
@@ -73,7 +73,7 @@ def dated(text):
     return text.replace("# Договор поставки", "# Договор поставки\n«01» ноября 2026 г.")
 
 
-def test_the_reference_against_itself(company, fake_thresholds):
-    r = contract.check(company, FakeEmbedder(), dated(company.reference_text)).as_dict()
+def test_the_reference_against_itself(company):
+    r = contract.check(company, dated(company.reference_text)).as_dict()
     assert all(c["status"] == "same" for c in r["clauses"])
     assert r["findings"] == []

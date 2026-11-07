@@ -285,7 +285,7 @@
         '<div class="row g-3 flex-nowrap"><div class="col-auto dc-clause-num">' + esc(c.number) + '</div><div class="col dc-min0">' + body +
         '<div class="dc-clause-meta"><span class="badge bg-' + st[1] + '-lt">' + st[0] + "</span>" +
         (c.ref && c.ref !== c.number ? '<span class="text-secondary">п. ' + esc(c.ref) + " эталона</span>" : "") +
-        (c.dense != null && c.status !== "same" ? '<span class="text-secondary" title="Сходство по смыслу и доля общих слов с пунктом эталона">смысл ' + c.dense.toFixed(2) + " · слова " + c.lexical.toFixed(2) + "</span>" : "") +
+        (c.similarity != null && c.status !== "same" ? '<span class="text-secondary" title="Насколько текст похож на пункт эталона и доля общих слов">сходство ' + Math.min(1, c.similarity).toFixed(2) + " · слова " + c.lexical.toFixed(2) + "</span>" : "") +
         (worst ? badge(worst) : "") +
         "</div></div></div></div>");
       (missing[c.id] || []).forEach(function (f) {

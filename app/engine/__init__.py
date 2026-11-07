@@ -1,7 +1,7 @@
-"""The search core of ai-consultant v0.3.1 (github.com/DogNellaf/ai-consultant), file for file.
+"""How a contract's clauses find their reference clauses and an invoice's lines their price list.
 
-embed.py runs multilingual-e5-small (int8 ONNX) on the CPU, lexical.py weighs the shared words by
-rarity; a pair is scored the same way as in ai-consultant's search.py: meaning plus 0.1 of the
-word overlap. Here the core matches a contract's clauses to the company's reference contract and
-an invoice's lines to the agreed price list, instead of questions to a knowledge base.
+lexical.py is ai-consultant's word overlap weighted by rarity, file for file. grams.py compares
+texts by character n-grams, which survive Russian word endings. match.py pairs two lists by both,
+best first, one partner each, with a "not the same thing" threshold. No model and no download:
+on the examples this pairs every clause and line the same way the e5 model did, in milliseconds.
 """

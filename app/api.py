@@ -52,8 +52,8 @@ def _visitor(request: Request) -> str:
 
 
 @app.get("/health")
-def health():
-    return {"ok": True}
+def health(request: Request):
+    return {"ok": True, "examples": len(_service(request).examples)}
 
 
 @app.get("/api/examples")

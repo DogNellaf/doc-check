@@ -83,11 +83,12 @@ def _pdf(data: bytes) -> Text:
         texts = [page.extract_text(extraction_mode="layout") or "" for page in reader.pages]
     except PdfReadError as e:
         raise ReadError("Не получилось прочитать PDF.") from e
-    ocr = False
-    for i, t in enumerate(texts):
-        if len(t.strip()) < 30:  # no text layer: a scanned page
-            texts[i] = ocr_pdf_page(data, i)
-            ocr = True
+    scanned = [i for i, t in enumerate(texts) if len(t.strip()) < 30]  # no text layer
+    if len(scanned) > config.OCR_MAX_PAGES:
+        raise ReadError(f"В скане больше {config.OCR_MAX_PAGES} страниц, пришлите первые страницы отдельно.")
+    for i in scanned:
+        texts[i] = ocr_pdf_page(data, i)
+    ocr = bool(scanned)
     return Text("\n\n".join(_layout(t) for t in texts), n, ocr, "pdf")
 
 
@@ -178,6 +179,9 @@ def _long_runs(dark, length: int):
     return (fc[:, hi] - fc[:, lo]) > 0
 
 
+_BAND = 256
+
+
 def without_rules(img):
     """Table borders turned white. Tesseract reads the grid of an invoice as "|", "[" and lost digits;
     a letter has no stroke that long, so only the lines go. Scale-aware: lengths are for 300 dpi."""
@@ -187,7 +191,14 @@ def without_rules(img):
     a = np.asarray(img)
     dark = a < 150
     scale = img.width / 2480  # A4 at 300 dpi
-    lines = _long_runs(dark, max(20, int(90 * scale))) | _long_runs(dark.T, max(20, int(60 * scale))).T
+    h_len, v_len = max(20, int(90 * scale)), max(20, int(60 * scale))
+    # in bands of rows (and of columns for the vertical lines): the cumulative sums of a whole A4
+    # page at 300 dpi would take ~150 MB at once, a band of 256 takes a few
+    lines = np.zeros_like(dark)
+    for r in range(0, dark.shape[0], _BAND):
+        lines[r : r + _BAND] |= _long_runs(dark[r : r + _BAND], h_len)
+    for c in range(0, dark.shape[1], _BAND):
+        lines[:, c : c + _BAND] |= _long_runs(dark[:, c : c + _BAND].T, v_len).T
     # the antialiased edges of a line go too
     lines = lines | np.roll(lines, 1, 0) | np.roll(lines, -1, 0) | np.roll(lines, 1, 1) | np.roll(lines, -1, 1)
     out = a.copy()

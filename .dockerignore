@@ -1,6 +1,6 @@
 .venv
 .git
-models
+precomputed
 .env
 __pycache__
 .pytest_cache

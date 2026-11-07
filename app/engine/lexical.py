@@ -1,12 +1,8 @@
-"""Word overlap between a question and a fragment, the second half of the hybrid search.
+"""Word overlap weighted by rarity, from ai-consultant's search.
 
-e5 similarity alone does not separate "not in the base" well: on the Kolosok base the weakest
-question that is in the base scored 0.802 and "how much is an iPhone 15 repair" 0.812. A question
-that shares no meaningful word with the best fragment is almost always off topic, so the
-overlap decides the "don't know".
-
-The stemming is a crude prefix cut on purpose: it is written the same way in widget/kb-search.js,
-so the browser and the server agree on every number.
+Two texts that share no meaningful word are almost never about the same thing, so the overlap
+is the second test of a pair, next to the n-gram similarity. The stemming is a crude prefix cut
+on purpose: it is the same in ai-consultant, so both projects agree on every number.
 """
 
 from __future__ import annotations

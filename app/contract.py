@@ -234,15 +234,19 @@ class ContractResult:
         }
 
 
-def check(company: Company, embedder, text: str) -> ContractResult:
+def check(company: Company, text: str) -> ContractResult:
     doc = parse(text)
     ref = parse(company.reference_text)
+
+    def same_number(i: int, j: int) -> float:
+        return config.CLAUSE_NUMBER_BONUS if doc.clauses[i].number == ref.clauses[j].number else 0.0
+
     pairs = align(
-        embedder,
         [c.passage for c in doc.clauses],
         [c.passage for c in ref.clauses],
-        config.CLAUSE_MIN_DENSE,
+        config.CLAUSE_MIN_SIMILARITY,
         config.CLAUSE_MIN_LEXICAL,
+        bonus=same_number,
     )
     pair_of = {p.left: p for p in pairs}
     paired_ref = {p.right for p in pairs}
@@ -302,7 +306,7 @@ def check(company: Company, embedder, text: str) -> ContractResult:
                 "ref": r.number if r else "",
                 "ref_text": r.text if r else "",
                 "diff": diff_words(r.text, c.text) if r and status != "same" else [],
-                "dense": round(p.dense, 3) if p else None,
+                "similarity": round(p.similarity, 3) if p else None,
                 "lexical": round(p.lexical, 2) if p else None,
                 "levels": sorted({f.level for f in rule_hits}),
             }

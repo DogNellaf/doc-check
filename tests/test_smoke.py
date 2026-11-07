@@ -1,4 +1,4 @@
-"""Acceptance on the real model and real thresholds: every planted problem of the three examples is
+"""Acceptance with the real thresholds: every planted problem of the three examples is
 found, and a clean contract and a clean invoice get no findings at all."""
 
 import pytest
@@ -38,8 +38,8 @@ INVOICE = {
 }
 
 
-def test_contract_example(company, e5):
-    r = contract.check(company, e5, read("d.docx", example("dogovor-postavki-31-27.docx")).text).as_dict()
+def test_contract_example(company):
+    r = contract.check(company, read("d.docx", example("dogovor-postavki-31-27.docx")).text).as_dict()
     got = {(f["kind"], f["rule"], f["where"]) for f in r["findings"]}
     assert got == CONTRACT
     pairs = {c["number"]: c["ref"] for c in r["clauses"]}
@@ -49,8 +49,8 @@ def test_contract_example(company, e5):
     assert fixes["prepayment"].startswith("Покупатель оплачивает каждую партию Товара в течение 14")
 
 
-def test_invoice_example(company, e5):
-    r = invoice.check(company, e5, read("s.pdf", example("schet-412.pdf")).text).as_dict()
+def test_invoice_example(company):
+    r = invoice.check(company, read("s.pdf", example("schet-412.pdf")).text).as_dict()
     assert {(f["kind"], f["where"]) for f in r["findings"]} == INVOICE
     assert [x.get("spec", {}).get("price") for x in r["lines"]][:6] == [
         "2 450,00", "1 980,00", "18 600,00", "3 900,00", "2 100,00", "4 680,00",
@@ -58,14 +58,14 @@ def test_invoice_example(company, e5):
 
 
 @pytest.mark.skipif(not HAS_TESSERACT, reason="no tesseract")
-def test_scan_example(company, e5):
-    r = invoice.check(company, e5, read("s.pdf", example("schet-419-skan.pdf")).text).as_dict()
+def test_scan_example(company):
+    r = invoice.check(company, read("s.pdf", example("schet-419-skan.pdf")).text).as_dict()
     assert [(f["kind"], f["title"]) for f in r["findings"]] == [("vat", "НДС 20 % вместо 22 %")]
 
 
-def test_no_false_alarms(company, e5):
+def test_no_false_alarms(company):
     r = contract.check(
-        company, e5, company.reference_text.replace("# Договор поставки", "# Договор поставки\n«01» ноября 2026 г.")
+        company, company.reference_text.replace("# Договор поставки", "# Договор поставки\n«01» ноября 2026 г.")
     ).as_dict()
     assert r["findings"] == [] and r["verdict"]["level"] == "ok"
 
@@ -81,5 +81,5 @@ def test_no_false_alarms(company, e5):
         ("Дрожжи прессованные, коробка 10 кг", 2, "кор", "2100.00", None),
         ("Яйцо куриное С0, коробка 360 шт", 5, "кор", "4680.00", None),
     ]
-    r = invoice.check(company, e5, read("c.pdf", make_invoice_pdf(clean)).text).as_dict()
+    r = invoice.check(company, read("c.pdf", make_invoice_pdf(clean)).text).as_dict()
     assert r["findings"] == [] and r["verdict"]["level"] == "ok"
