@@ -4,85 +4,175 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Проверка договоров и счетов — ООО «Колосок»</title>
-  <!-- Look: Tabler 1.6.1 (MIT, tabler.io), icons: Lucide 1.57 (ISC, lucide.dev). Nothing from a CDN. -->
+  <!-- Layout: the "vertical layout" page of Tabler 1.6.1 (MIT, tabler.io) with a dark sidebar,
+       icons: Lucide (ISC, lucide.dev). Nothing from a CDN. -->
   <link rel="stylesheet" href="vendor/tabler/tabler.min.css">
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
 <div class="page">
-  <header class="navbar navbar-expand-md d-print-none dc-navbar">
-    <div class="container-xl">
-      <div class="navbar-brand dc-brand">
+  <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
+    <div class="container-fluid">
+      <button class="btn btn-ghost-light btn-icon d-lg-none dc-toggler" type="button" id="menu-toggle" aria-controls="sidebar-menu" aria-expanded="false" aria-label="Меню" data-icon="menu"></button>
+      <a class="navbar-brand navbar-brand-autodark dc-brand" href="#check" data-page="check">
         <span class="dc-logo" data-icon="shield-check"></span>
-        <span>Проверка договоров и счетов</span>
-        <span class="text-secondary fw-normal dc-company">ООО «Колосок»</span>
+        <span class="dc-brand-text">Колосок<small>Проверка документов</small></span>
+      </a>
+      <div class="navbar-footer d-none d-lg-block">
+        <div class="dc-org">
+          <span class="avatar avatar-sm bg-primary text-white">К</span>
+          <div class="dc-org-text">
+            <div id="org-name">ООО «Колосок»</div>
+            <div class="small text-secondary" id="org-inn"></div>
+          </div>
+        </div>
       </div>
-      <nav class="dc-tabs" aria-label="Разделы">
-        <button type="button" class="dc-tab active" data-page="check" aria-current="page"><span data-icon="file-check"></span>Проверка</button>
-        <button type="button" class="dc-tab" data-page="company"><span data-icon="book-open"></span>Эталон и правила</button>
+      <nav class="collapse navbar-collapse" id="sidebar-menu" aria-label="Разделы">
+        <ul class="navbar-nav pt-lg-3">
+          <li class="nav-section-title">Документы</li>
+          <li class="nav-item active">
+            <a class="nav-link" href="#check" data-page="check" aria-current="page">
+              <span class="nav-link-icon" data-icon="file-search"></span>
+              <span class="nav-link-title">Проверка</span>
+            </a>
+          </li>
+          <li class="nav-section-title">С чем сверяем</li>
+          <li class="nav-item">
+            <a class="nav-link" href="#reference" data-page="reference">
+              <span class="nav-link-icon" data-icon="book-open"></span>
+              <span class="nav-link-title">Эталон договора</span>
+              <span class="badge badge-sm bg-secondary-lt ms-auto" id="count-reference"></span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#rules" data-page="rules">
+              <span class="nav-link-icon" data-icon="scale"></span>
+              <span class="nav-link-title">Правила юриста</span>
+              <span class="badge badge-sm bg-secondary-lt ms-auto" id="count-rules"></span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#suppliers" data-page="suppliers">
+              <span class="nav-link-icon" data-icon="truck"></span>
+              <span class="nav-link-title">Поставщики и цены</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#orders" data-page="orders">
+              <span class="nav-link-icon" data-icon="clipboard-list"></span>
+              <span class="nav-link-title">Заказы</span>
+              <span class="badge badge-sm bg-secondary-lt ms-auto" id="count-orders"></span>
+            </a>
+          </li>
+        </ul>
       </nav>
     </div>
-  </header>
+  </aside>
 
   <div class="page-wrapper">
-    <div class="page-body">
-      <div class="container-xl">
 
-        <!-- check -->
-        <div class="row g-3" id="page-check">
-          <div class="col-lg-4 col-xl-3">
-            <div class="card mb-3">
-              <div class="card-header"><h3 class="card-title">Примеры</h3></div>
-              <div class="list-group list-group-flush" id="examples"></div>
+    <!-- check -->
+    <main class="dc-page" id="page-check">
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <div class="row g-2 align-items-center">
+            <div class="col">
+              <div class="page-pretitle">ООО «Колосок» · закупки</div>
+              <h1 class="page-title">Проверка договоров и счетов</h1>
             </div>
-            <div class="card">
-              <div class="card-header"><h3 class="card-title">Свой документ</h3></div>
-              <div class="card-body">
-                <label class="dc-drop" id="drop">
-                  <input type="file" id="file" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg,.tif,.tiff,.webp" hidden>
-                  <span data-icon="upload" class="dc-drop-icon"></span>
-                  <b>Выберите или перетащите файл</b>
-                  <span class="text-secondary small">Договор или счёт: PDF, скан JPG или PNG, DOCX, до 5 МБ</span>
-                </label>
-                <div class="small text-secondary mt-2" id="quota"></div>
-                <div class="small text-secondary mt-1">Файл не сохраняется: отчёт живёт в памяти час, чтобы его можно было скачать. Договор сверяется с эталоном «Колоска», счёт — с его поставщиками.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-8 col-xl-9">
-            <div id="result">
-              <div class="card"><div class="card-body text-secondary">Загружаю примеры…</div></div>
+            <div class="col-12 col-sm-auto ms-auto">
+              <label class="btn btn-primary" for="file"><span data-icon="upload"></span>Загрузить документ</label>
             </div>
           </div>
         </div>
-
-        <!-- company -->
-        <div class="row g-3" id="page-company" hidden>
-          <div class="col-lg-7">
-            <div class="card">
-              <div class="card-header"><h3 class="card-title">Эталон договора поставки</h3></div>
-              <div class="card-body dc-ref" id="reference"></div>
-            </div>
-          </div>
-          <div class="col-lg-5">
-            <div class="card mb-3">
-              <div class="card-header"><h3 class="card-title">Правила юриста</h3></div>
-              <div class="list-group list-group-flush" id="rules"></div>
-            </div>
-            <div class="card mb-3">
-              <div class="card-header"><h3 class="card-title">Поставщики и спецификации</h3></div>
-              <div class="card-body" id="suppliers"></div>
-            </div>
-            <div class="card">
-              <div class="card-header"><h3 class="card-title">Заказы</h3></div>
-              <div class="card-body" id="orders"></div>
-            </div>
-          </div>
-        </div>
-
       </div>
-    </div>
+      <div class="page-body">
+        <div class="container-xl">
+          <div class="row row-cards" id="examples">
+            <div class="col-sm-6 col-xl-3" id="drop-col">
+              <label class="card card-sm dc-drop" id="drop" for="file">
+                <input type="file" id="file" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg,.tif,.tiff,.webp" hidden>
+                <span class="card-body">
+                  <span class="dc-drop-head">
+                    <span class="avatar avatar-square bg-primary-lt text-primary" data-icon="upload-cloud"></span>
+                    <span><b>Свой договор или счёт</b><span class="d-block text-secondary small">Перетащите файл или нажмите</span></span>
+                  </span>
+                  <span class="d-block text-secondary small mt-2 dc-drop-more">PDF, DOCX, скан JPG или PNG, до 5 МБ. Файл не сохраняется.</span>
+                  <span class="d-block small mt-1" id="quota"></span>
+                </span>
+              </label>
+            </div>
+          </div>
+          <div class="mt-3" id="result"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- reference -->
+    <main class="dc-page" id="page-reference" hidden>
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <div class="page-pretitle">С чем сверяем</div>
+          <h1 class="page-title">Эталон договора поставки</h1>
+          <p class="text-secondary mt-1 mb-0">Каждый пункт договора поставщика ищется здесь по смыслу, даже если у него другой номер или другие слова. Отличия попадают в замечания и в Word с правками.</p>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="container-xl">
+          <div class="card"><div class="card-body dc-ref" id="reference"></div></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- rules -->
+    <main class="dc-page" id="page-rules" hidden>
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <div class="page-pretitle">С чем сверяем</div>
+          <h1 class="page-title">Правила юриста</h1>
+          <p class="text-secondary mt-1 mb-0">Правила лежат в файле <code>rules.toml</code>: юрист правит текст, а не код. Договор проходит по ним пункт за пунктом.</p>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="container-xl">
+          <div class="card">
+            <table class="table table-vcenter card-table table-mobile-md dc-rules">
+              <thead><tr><th>Уровень</th><th>Правило</th><th>Почему</th><th>Проверка</th></tr></thead>
+              <tbody id="rules"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- suppliers -->
+    <main class="dc-page" id="page-suppliers" hidden>
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <div class="page-pretitle">С чем сверяем</div>
+          <h1 class="page-title">Поставщики и цены</h1>
+          <p class="text-secondary mt-1 mb-0">Реквизиты из договора и спецификация. Счёт с другим расчётным счётом или с ценой выше спецификации получает замечание.</p>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="container-xl"><div class="row row-cards" id="suppliers"></div></div>
+      </div>
+    </main>
+
+    <!-- orders -->
+    <main class="dc-page" id="page-orders" hidden>
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <div class="page-pretitle">С чем сверяем</div>
+          <h1 class="page-title">Заказы</h1>
+          <p class="text-secondary mt-1 mb-0">Строки счёта сверяются с заказом, на который он выставлен: лишние позиции и количество сверх заказа попадают в замечания.</p>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="container-xl"><div class="row row-cards" id="orders"></div></div>
+      </div>
+    </main>
+
   </div>
 </div>
 <script src="app.js"></script>

@@ -106,7 +106,8 @@ pytest                                   # тестам OCR нужен tesseract
 ruff check . && ruff format --check .
 ```
 
-Страница сделана на [Tabler](https://tabler.io) 1.6.1 (MIT) с иконками [Lucide](https://lucide.dev)
+Страница повторяет вертикальную раскладку дашборда [Tabler](https://tabler.io) 1.6.1 (MIT): в боковом
+меню проверка, эталон договора, правила юриста, поставщики со спецификациями и заказы. Иконки [Lucide](https://lucide.dev)
 (ISC), всё отдаётся самим приложением. PDF примеров набраны шрифтом PT Sans от ParaType (OFL).
 
 ## Лицензия

@@ -19,7 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   or a letter to the supplier about the invoice.
 - An optional model (GigaChat or an OpenAI-compatible API) that reads invoice lines the rules cannot
   find, with a queue and a daily token budget.
-- A web page on Tabler with three examples (a draft contract, an invoice and a scanned invoice) and
-  an upload, 10 checks of own files per visitor a day, uploads kept in memory for an hour.
+- A web page on the Tabler dashboard layout with three examples (a draft contract, an invoice and a
+  scanned invoice) and an upload, and sidebar pages with the reference contract, the lawyer's rules,
+  suppliers with their price lists and the orders. 10 checks of own files per visitor a day, uploads
+  kept in memory for an hour.
 - The acceptance test on the real model: 25 of 25 planted problems found, no findings on the
   reference contract and on a clean invoice.

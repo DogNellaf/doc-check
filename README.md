@@ -106,8 +106,9 @@ pytest                                   # the OCR tests need tesseract with rus
 ruff check . && ruff format --check .
 ```
 
-The page is built on [Tabler](https://tabler.io) 1.6.1 (MIT) with [Lucide](https://lucide.dev)
-icons (ISC), served from the app. The example PDFs use PT Sans by ParaType (OFL).
+The page follows the vertical layout of the [Tabler](https://tabler.io) 1.6.1 dashboard (MIT): a sidebar
+with the check, the reference contract, the lawyer's rules, suppliers with their price lists and the
+orders. Icons are [Lucide](https://lucide.dev) (ISC). Everything is served from the app. The example PDFs use PT Sans by ParaType (OFL).
 
 ## License
 

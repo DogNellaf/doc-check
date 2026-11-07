@@ -216,7 +216,9 @@ class Service:
         ref = contract.parse(co.reference_text)
         return {
             "name": co.name,
+            "requisites": co.requisites.as_dict(),
             "vat_rate": co.vat_rate,
+            "reference_name": co.reference_name,
             "reference": [{"number": c.number, "section": c.section, "text": c.text} for c in ref.clauses],
             "rules": [
                 {"id": r.id, "level": r.level, "title": r.title, "why": r.why, "check": r.check, "limit": r.limit}
