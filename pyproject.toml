@@ -1,0 +1,21 @@
+[project]
+name = "doc-check"
+version = "0.1.0"
+description = "Contract and invoice checker on the ai-consultant engine: reference contract, rules, price list, order"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = [".venv", "models"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = [
+    "E501",  # long lines left are Russian texts in literals
+    "B008",  # File() in FastAPI signatures
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
